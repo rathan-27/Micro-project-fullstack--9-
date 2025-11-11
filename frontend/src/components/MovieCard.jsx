@@ -1,19 +1,30 @@
 import { Link } from "react-router-dom";
 
 export default function MovieCard({ movie }) {
+    const img = movie.poster_url || "https://via.placeholder.com/300x450?text=No+Image";
+
     return (
-        <div className="card h-100 shadow-sm">
-            {movie.poster_url ? (
-                <img src={movie.poster_url} className="card-img-top" alt={movie.title} style={{ height: 260, objectFit: "cover" }} />
-            ) : (
-                <div className="bg-secondary-subtle" style={{ height: 260 }} />
-            )}
-            <div className="card-body d-flex flex-column">
+        <div className="card shadow-sm">
+            <img
+                src={img}
+                className="card-img-top"
+                alt={movie.title}
+                style={{ height: "350px", objectFit: "cover" }}
+            />
+
+            <div className="card-body">
                 <h5 className="card-title">{movie.title}</h5>
-                <div className="text-muted small mb-2">{movie.release_year}</div>
-                <div className="mt-auto d-flex align-items-center justify-content-between">
-                    <span className="badge text-bg-warning">⭐ {Number(movie.avg_rating || 0).toFixed(1)}</span>
-                    <Link to={`/movie/${movie.id}`} className="btn btn-sm btn-primary">Details</Link>
+                <p className="text-muted mb-2">{movie.release_year}</p>
+
+                <div className="d-flex justify-content-between align-items-center">
+                    <span className="badge bg-warning text-dark">⭐ {movie.avg_rating?.toFixed(1) || 0}</span>
+
+                    <Link
+                        to={`/movie/${movie.id}`}
+                        className="btn btn-primary btn-sm"
+                    >
+                        Details
+                    </Link>
                 </div>
             </div>
         </div>

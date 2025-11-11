@@ -14,26 +14,6 @@ from .serializers import (
 )
 from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
 
-from rest_framework import status
-
-class ProfileUpdateView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def put(self, request):
-        user = request.user
-        data = request.data
-
-        if "username" in data:
-            user.username = data["username"]
-
-        if "email" in data:
-            user.email = data["email"]
-
-        if "password" in data and data["password"].strip():
-            user.set_password(data["password"])
-
-        user.save()
-        return Response({"message": "Profile updated successfully"}, status=status.HTTP_200_OK)
 
 class RegisterView(CreateAPIView):
     queryset = User.objects.all()
@@ -63,7 +43,42 @@ class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response(UserSerializer(request.user).data)
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+    def put(self, request):
+        user = request.user
+        user.username = request.data.get("username", user.username)
+        user.email = request.data.get("email", user.email)
+
+        if request.data.get("password"):
+            user.set_password(request.data.get("password"))
+
+        user.save()
+        return Response({"status": "updated"})
+
+
+from rest_framework import status
+
+class ProfileUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        user = request.user
+        data = request.data
+
+        if "username" in data:
+            user.username = data["username"]
+
+        if "email" in data:
+            user.email = data["email"]
+
+        if "password" in data and data["password"].strip():
+            user.set_password(data["password"])
+
+        user.save()
+        return Response({"message": "Profile updated successfully"}, status=status.HTTP_200_OK)
+
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

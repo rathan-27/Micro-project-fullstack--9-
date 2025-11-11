@@ -10,7 +10,7 @@ export default function MovieDetail() {
     const [text, setText] = useState("");
     const [rating, setRating] = useState(5);
 
-    const authed = !!localStorage.getItem("access");
+    const authed = !!localStorage.getItem("token");
 
     const load = useCallback(async () => {
         try {
@@ -38,7 +38,7 @@ export default function MovieDetail() {
 
             setText("");
             setRating(5);
-            load();
+            load(); // refresh after posting
         } catch (err) {
             console.log("Review post error:", err);
             alert("Failed to post review. Make sure you are logged in.");
@@ -50,102 +50,100 @@ export default function MovieDetail() {
 
         try {
             await http.post(`/reviews/${rid}/${type}/`);
-            load();
+            load(); // refresh after like/dislike
         } catch (err) {
             console.log(err);
         }
     };
 
-    if (!movie) return <div className="text-center py-5 movie-detail-container">Loading…</div>;
+    if (!movie) return <div className="text-center py-5">Loading…</div>;
 
     return (
-        <div className="movie-detail-container container py-4">
+        <div className="row g-4 text-white">
 
-            {/* ✅ Go Back Positioned Center */}
-            <div className="text-center mb-3">
-                <button onClick={() => nav(-1)} className="btn btn-outline-light px-4">
-                    ← Go Back
-                </button>
+            {/* ✅ GO BACK BUTTON ADDED */}
+            <button
+                onClick={() => nav(-1)}
+                className="btn btn-outline-secondary mb-3"
+            >
+                ← Go Back
+            </button>
+
+            <div className="col-md-4">
+                {movie.poster_url ? (
+                    <img
+                        src={movie.poster_url}
+                        className="img-fluid rounded shadow-sm"
+                        alt={movie.title}
+                    />
+                ) : (
+                    <div className="rounded bg-secondary-subtle" style={{ height: 380 }} />
+                )}
             </div>
 
-            <div className="row g-4">
-                <div className="col-md-4 d-flex justify-content-center">
-                    {movie.poster_url ? (
-                        <img
-                            src={movie.poster_url}
-                            className="img-fluid rounded shadow"
-                            alt={movie.title}
-                        />
-                    ) : (
-                        <div className="rounded bg-secondary-subtle" style={{ height: 380 }} />
-                    )}
+            <div className="col-md-8">
+                <h2 className="mb-1">{movie.title}</h2>
+                <div className="text-muted mb-2">{movie.release_year}</div>
+                <p>{movie.description}</p>
+
+                <div className="mb-2">
+                    <span className="badge text-bg-warning">
+                        ⭐ {Number(movie.avg_rating || 0).toFixed(1)}
+                    </span>
                 </div>
 
-                <div className="col-md-8">
-
-                    <h2 className="mb-1 fw-bold">{movie.title}</h2>
-                    <div className="mb-2 opacity-75">{movie.release_year}</div>
-                    <p className="fs-5">{movie.description}</p>
-
-                    <div className="mb-2">
-                        <span className="badge bg-warning text-dark fs-6 px-3 py-2">
-                            ⭐ {Number(movie.avg_rating || 0).toFixed(1)}
+                <div className="mb-3">
+                    {movie.genres?.map((g) => (
+                        <span key={g.id} className="badge text-bg-light me-2">
+                            {g.name}
                         </span>
-                    </div>
+                    ))}
+                </div>
 
-                    <div className="mb-3">
-                        {movie.genres?.map((g) => (
-                            <span key={g.id} className="badge bg-light text-dark me-2 px-3 py-2">
-                                {g.name}
-                            </span>
-                        ))}
-                    </div>
+                <hr />
 
-                    <hr className="border-light" />
+                <h5 className="mb-2">Add a review</h5>
 
-                    <h5 className="mb-2">Add a Review</h5>
-
-                    <div className="row g-2 align-items-center">
-                        <div className="col-auto">
-                            <select
-                                value={rating}
-                                onChange={(e) => setRating(e.target.value)}
-                                className="form-select"
-                            >
-                                {[1, 2, 3, 4, 5].map((n) => (
-                                    <option key={n} value={n}>
-                                        {n} ⭐
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="col">
-                            <input
-                                className="form-control"
-                                placeholder="Share your thoughts…"
-                                value={text}
-                                onChange={(e) => setText(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="col-auto">
-                            <button onClick={submitReview} className="btn btn-primary">
-                                Post
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="mt-4">
-                        <h5 className="mb-2">Reviews</h5>
-                        <div className="d-flex flex-column gap-3">
-                            {(movie.reviews || []).map((r) => (
-                                <ReviewItem key={r.id} r={r} onReact={reactTo} />
+                <div className="row g-2">
+                    <div className="col-auto">
+                        <select
+                            value={rating}
+                            onChange={(e) => setRating(e.target.value)}
+                            className="form-select"
+                        >
+                            {[1, 2, 3, 4, 5].map((n) => (
+                                <option key={n} value={n}>
+                                    {n} ⭐
+                                </option>
                             ))}
-                            {!movie.reviews?.length && (
-                                <div className="opacity-75">No reviews yet.</div>
-                            )}
-                        </div>
+                        </select>
+                    </div>
+
+                    <div className="col">
+                        <input
+                            className="form-control"
+                            placeholder="Share your thoughts…"
+                            value={text}
+                            onChange={(e) => setText(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="col-auto">
+                        <button onClick={submitReview} className="btn btn-primary">
+                            Post
+                        </button>
+                    </div>
+                </div>
+
+                <div className="mt-4">
+                    <h5 className="mb-2">Reviews</h5>
+                    <div className="d-flex flex-column gap-3">
+                        {(movie.reviews || []).map((r) => (
+                            <ReviewItem key={r.id} r={r} onReact={reactTo} />
+                        ))}
+                        {!movie.reviews?.length && (
+                            <div className="text-muted">No reviews yet.</div>
+                        )}
                     </div>
                 </div>
             </div>

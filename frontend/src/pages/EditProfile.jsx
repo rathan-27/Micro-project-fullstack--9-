@@ -3,56 +3,81 @@ import { useNavigate } from "react-router-dom";
 import http from "../api/http";
 
 export default function EditProfile() {
-  const nav = useNavigate();
-  const [form, setForm] = useState({ username: "", email: "" });
+    const nav = useNavigate();
 
-  useEffect(() => {
-    http.get("/auth/profile/").then(({ data }) => {
-      setForm({ username: data.username, email: data.email });
-    });
-  }, []);
+    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
 
-  const save = async (e) => {
-    e.preventDefault();
-    try {
-      await http.put("/auth/profile/", form);
-      alert("Profile updated ✅");
-      nav("/profile");
-    } catch {
-      alert("Failed to update profile ❌");
-    }
-  };
+    useEffect(() => {
+        http.get("/auth/profile/").then(({ data }) => {
+            setUsername(data.username);
+            setEmail(data.email);
+        });
+    }, []);
 
-  return (
-    <div className="page-center">
-      <div className="form-box">
+    const saveChanges = async () => {
+        try {
+            await http.put("/auth/profile/", {
+                username,
+                email,
+                password: password || undefined,
+            });
 
-        {/* ✅ BACK BUTTON */}
-        <button
-          className="btn btn-outline-light mb-3"
-          onClick={() => nav(-1)}
-        >
-          ← Back
-        </button>
+            localStorage.setItem("username", username);
+            alert("✅ Profile Updated Successfully!");
+            nav("/profile");
+        } catch (err) {
+            alert("❌ Update Failed");
+            console.log(err);
+        }
+    };
 
-        <h3 className="text-white text-center mb-3">Edit Profile</h3>
+    return (
+        <div className="profile-page d-flex justify-content-center align-items-center" style={{ minHeight: "80vh" }}>
+            <div className="profile-card shadow-lg" style={{ maxWidth: 420 }}>
 
-        <form onSubmit={save} className="d-flex flex-column gap-3">
-          <input
-            className="form-control"
-            value={form.username}
-            onChange={(e) => setForm({ ...form, username: e.target.value })}
-          />
+                {/* ✅ Back Button */}
+                <button className="btn btn-outline-light btn-sm mb-3" onClick={() => nav("/profile")}>
+                    ← Back
+                </button>
 
-          <input
-            className="form-control"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
+                <h3 className="text-center mb-3 text-light">Edit Profile</h3>
 
-          <button className="btn btn-primary w-100">Save Changes</button>
-        </form>
-      </div>
-    </div>
-  );
+                <div className="form-group mb-3">
+                    <label className="form-label text-light">Username</label>
+                    <input
+                        className="form-control"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                    />
+                </div>
+
+                <div className="form-group mb-3">
+                    <label className="form-label text-light">Email</label>
+                    <input
+                        type="email"
+                        className="form-control"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                </div>
+
+                <div className="form-group mb-4">
+                    <label className="form-label text-light">New Password (optional)</label>
+                    <input
+                        type="password"
+                        className="form-control"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Leave blank to keep same"
+                    />
+                </div>
+
+                <button className="btn btn-warning w-100" onClick={saveChanges}>
+                    ✅ Save Changes
+                </button>
+            </div>
+        </div>
+    );
 }

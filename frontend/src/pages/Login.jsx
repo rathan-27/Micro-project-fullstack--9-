@@ -3,53 +3,51 @@ import { useNavigate } from "react-router-dom";
 import http from "../api/http";
 
 export default function Login() {
-    const nav = useNavigate();
-    const [form, setForm] = useState({ username: "", password: "" });
-    const [error, setError] = useState("");
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
+    async function handleSubmit(e) {
         e.preventDefault();
-        setError("");
-
         try {
-            const { data } = await http.post("/auth/login/", form);
+            const response = await http.post("/auth/login/", {
+                username,
+                password,
+            });
 
-            localStorage.setItem("access", data.access);
-            localStorage.setItem("refresh", data.refresh);
-            localStorage.setItem("username", form.username);
+            const token = response.data.access;
+            localStorage.setItem("token", token);
 
-            nav("/");
+            navigate("/");
         } catch {
-            setError("Invalid username or password.");
+            alert("Invalid username or password");
         }
-    };
+    }
 
     return (
-        <div className="page-center">
-            <div className="form-box">
-                <h3 className="mb-3 text-white text-center">Login</h3>
+        <div className="d-flex justify-content-center align-items-center vh-100">
+            <div className="card p-4 shadow" style={{ minWidth: "350px" }}>
+                <h3 className="mb-3 text-center">Login</h3>
 
-                {error && <div className="alert alert-danger py-2">{error}</div>}
-
-                <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
-
+                <form onSubmit={handleSubmit}>
                     <input
-                        type="text"
-                        className="form-control"
+                        className="form-control mb-3"
                         placeholder="Username"
-                        value={form.username}
-                        onChange={(e) => setForm({ ...form, username: e.target.value })}
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
                     />
 
                     <input
-                        type="password"
-                        className="form-control"
+                        className="form-control mb-3"
                         placeholder="Password"
-                        value={form.password}
-                        onChange={(e) => setForm({ ...form, password: e.target.value })}
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                     />
 
-                    <button className="btn btn-primary w-100">Login</button>
+                    <button className="btn btn-primary w-100" type="submit">
+                        Login
+                    </button>
                 </form>
             </div>
         </div>

@@ -10,21 +10,13 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
         fields = ["id", "name"]
 
+
 class ReviewSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
-    likes = serializers.SerializerMethodField()
-    dislikes = serializers.SerializerMethodField()
 
     class Meta:
         model = Review
-        fields = ["id", "user", "text", "rating", "likes", "dislikes", "created_at"]
-
-    def get_likes(self, obj):
-        return obj.reactions.filter(value=1).count()
-
-    def get_dislikes(self, obj):
-        return obj.reactions.filter(value=-1).count()
-
+        fields = ["id", "user", "text", "rating", "created_at"]
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -56,10 +48,21 @@ class MovieSerializer(serializers.ModelSerializer):
         return round(avg or 0, 1)
 
 
-class ReviewCreateSerializer(serializers.ModelSerializer):
+class ReviewSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)
+    likes = serializers.SerializerMethodField()
+    dislikes = serializers.SerializerMethodField()
+
     class Meta:
         model = Review
-        fields = ["movie", "text", "rating"]
+        fields = ["id", "user", "text", "rating", "likes", "dislikes", "created_at"]
+
+    def get_likes(self, obj):
+        return obj.reactions.filter(value=1).count()
+
+    def get_dislikes(self, obj):
+        return obj.reactions.filter(value=-1).count()
+
 
 
 class RegisterSerializer(serializers.ModelSerializer):

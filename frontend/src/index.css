@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
 /* ---------- RESET ---------- */
 * {
   margin: 0;
@@ -216,6 +218,29 @@ body {
   color: #fff !important;
 }
 
+body {
+  background: linear-gradient(to bottom right, #0d1b2a, #1b263b, #415a77);
+  min-height: 100vh;
+}
+
+.page-center {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-box {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  padding: 25px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 380px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
 /* Profile Page Background */
 .profile-page {
   padding: 40px 0;
@@ -308,8 +333,4 @@ body {
 .review-card .reactions {
   color: #ccc;
   font-size: 14px;
-}
-
-.profile-page .btn-outline-light {
-  margin-left: 0 !important;
 }

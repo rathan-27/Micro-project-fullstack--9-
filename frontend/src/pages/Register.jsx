@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import http from "../api/http";
+import CenterLayout from "../layouts/CenterLayout";
+
 
 export default function Register() {
     const nav = useNavigate();
