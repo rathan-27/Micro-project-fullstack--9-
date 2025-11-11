@@ -1,0 +1,315 @@
+/* ---------- RESET ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+/* ---------- GLOBAL BACKGROUND (FULL SITE) ---------- */
+body {
+  background: linear-gradient(-45deg, #1b2735, #090a0f, #2e4a7d, #111826);
+  background-size: 400% 400%;
+  animation: gradientFlow 12s ease infinite;
+  min-height: 100vh;
+  color: #fff;
+}
+
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Container Fix */
+.container {
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* ---------- NAVBAR ---------- */
+.navbar {
+  background-color: rgba(0, 0, 0, 0.45) !important;
+  backdrop-filter: blur(8px);
+  padding: 12px 25px;
+}
+
+.navbar a,
+.navbar-brand {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.navbar a:hover {
+  color: #00aaff !important;
+}
+
+/* ---------- CENTER PAGE WRAPPER ---------- */
+.page-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 85vh;
+}
+
+/* ---------- LOGIN / REGISTER CARD ---------- */
+.form-box {
+  width: 380px;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 35px;
+  border-radius: 14px;
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.6);
+  animation: fadeIn 0.8s ease-out;
+  text-align: center;
+}
+
+@keyframes fadeIn {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Inputs */
+.form-box input {
+  background: rgba(255, 255, 255, 0.25);
+  border: none;
+  width: 100%;
+  padding: 12px;
+  color: #fff;
+  border-radius: 6px;
+  margin-bottom: 14px;
+}
+
+.form-box input::placeholder {
+  color: #e6e6e6;
+}
+
+.form-box input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Buttons */
+.form-box button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(95deg, #007bff, #00a0ff);
+  color: white;
+  transition: 0.3s ease;
+  box-shadow: 0px 0px 12px rgba(0, 153, 255, 0.7);
+}
+
+.form-box button:hover {
+  transform: scale(1.05);
+  background: linear-gradient(95deg, #0099ff, #3ab7ff);
+  box-shadow: 0px 0px 20px rgba(0, 153, 255, 1);
+}
+
+/* ---------- MOVIE CARDS ---------- */
+.movie-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding-bottom: 15px;
+  transition: 0.3s ease;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.movie-card img {
+  width: 100%;
+  height: 310px;
+  object-fit: cover;
+  border-radius: 10px 10px 0 0;
+}
+
+.movie-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.45);
+}
+
+/* Rating Badge */
+.rating-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #ffcc00;
+  color: #000;
+  font-weight: 600;
+}
+
+/* Movie Title */
+.movie-card h5 {
+  margin: 10px 12px 4px;
+}
+
+/* Movie Footer */
+.movie-card .btn {
+  margin: 0px 12px;
+  background: #007bff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: #fff;
+}
+
+.movie-card .btn:hover {
+  background: #0095ff;
+}
+
+/* ---------- REVIEW ITEMS ---------- */
+.review-box {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ----- MOVIE DETAIL PAGE TEXT FIX ----- */
+.movie-detail-container,
+.movie-detail-container * {
+  color: #ffffff !important;
+}
+
+/* Make review input text readable */
+.movie-detail-container input,
+.movie-detail-container select,
+.movie-detail-container textarea {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+  border: none !important;
+}
+
+.movie-detail-container input::placeholder,
+.movie-detail-container textarea::placeholder {
+  color: #ddd !important;
+}
+
+/* Review card styling */
+.review-box {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.auth-box h2 {
+  color: #fff !important;
+}
+
+/* Profile Page Background */
+.profile-page {
+  padding: 40px 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0b1e44, #3b1e5a);
+  /* SAME AS APP BG */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+/* Profile Card */
+.profile-card {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 30px 45px;
+  text-align: center;
+  width: 380px;
+  margin-bottom: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Avatar Circle */
+.avatar {
+  width: 90px;
+  height: 90px;
+  background: #ffb703;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 38px;
+  font-weight: bold;
+  margin: 0 auto 15px;
+}
+
+/* Name + Email */
+.username {
+  color: #fff;
+  font-weight: 600;
+}
+
+.email {
+  color: #ddd;
+}
+
+/* Reviews Section */
+.reviews-title {
+  color: #fff;
+  font-weight: 600;
+  width: 80%;
+  max-width: 900px;
+  margin-bottom: 15px;
+}
+
+.reviews-list {
+  width: 80%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Review Card */
+.review-card {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(8px);
+  border-left: 4px solid #ffb703;
+}
+
+.review-card .date {
+  font-size: 12px;
+  color: #ccc;
+}
+
+.review-card .rating {
+  color: #ffb703;
+  font-weight: bold;
+}
+
+.review-card .text {
+  color: #fff;
+  margin: 8px 0;
+}
+
+.review-card .reactions {
+  color: #ccc;
+  font-size: 14px;
+}
+
+.profile-page .btn-outline-light {
+  margin-left: 0 !important;
+}

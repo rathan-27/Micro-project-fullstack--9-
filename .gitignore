@@ -1,0 +1,24 @@
+# Python Virtual Env
+.venv/
+venv/
+env/
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# Django Database
+db.sqlite3
+
+# Node Modules (Frontend)
+frontend/node_modules/
+frontend/.vite/
+frontend/dist/
+
+# Environment Variables
+*.env
+.env
+
+# OS and Editor junk
+.DS_Store
+Thumbs.db
