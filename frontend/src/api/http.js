@@ -32,15 +32,14 @@ http.interceptors.response.use(
     async (err) => {
         const originalRequest = err.config;
 
-        // If no refresh token → logout
         if (err.response?.status === 401 && !originalRequest._retry) {
+
             const refresh = localStorage.getItem("refresh");
             if (!refresh) {
                 logoutUser();
                 return Promise.reject(err);
             }
 
-            // Avoid multiple refresh calls at once
             if (refreshing) {
                 return new Promise((resolve, reject) => {
                     queue.push({ resolve, reject });
@@ -56,20 +55,17 @@ http.interceptors.response.use(
             refreshing = true;
 
             try {
+                // ✅ FIXED REFRESH URL (NO MORE LOCALHOST)
                 const { data } = await axios.post(
-                    "http://127.0.0.1:8000/api/auth/refresh/",
+                    "https://micro-project-fullstack-9.onrender.com/api/auth/refresh/",
                     { refresh }
                 );
 
                 const newAccess = data.access;
-
-                // Save new access token
                 localStorage.setItem("access", newAccess);
 
-                // Execute queued requests
                 processQueue(null, newAccess);
 
-                // Retry original request
                 originalRequest.headers.Authorization = `Bearer ${newAccess}`;
                 return http(originalRequest);
             } catch (e) {
@@ -86,7 +82,7 @@ http.interceptors.response.use(
 );
 
 /* -------------------------
-   3. Logout Helper
+   3. Logout
 ------------------------- */
 function logoutUser() {
     localStorage.removeItem("access");
