@@ -1,18 +1,13 @@
+# movies/urls.py
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-
-from .views import MovieViewSet, ReviewViewSet
-from .auth_views import RegisterView, LoginView, ProfileView
-
-router = DefaultRouter()
-router.register("movies", MovieViewSet)
-router.register("reviews", ReviewViewSet)
+from . import views
 
 urlpatterns = [
-    path("", include(router.urls)),
+    path("", views.movie_list),
+    path("<int:pk>/", views.movie_detail),
+    path("reviews/", views.review_create),
+    path("reviews/<int:pk>/react/", views.review_react),
 
-    # AUTH API
-    path("auth/register/", RegisterView.as_view()),
-    path("auth/login/", LoginView.as_view()),
-    path("auth/profile/", ProfileView.as_view()),
+    # AUTH ROUTES HERE
+    path("auth/", include("movies.auth_urls")),
 ]

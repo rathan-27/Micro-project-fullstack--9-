@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/", include("movies.urls")),   # ALL backend API
+    path("api/", include("movies.urls")),   # Includes ALL movies + auth routes
 ]
 
 if settings.DEBUG:

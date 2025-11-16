@@ -6,7 +6,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-_onqlv5-@7(q8w(lgx&o($b00p65m&!r3vu2=@xwjnle^fshaf'
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    "micro-project-fullstack-9.onrender.com",
+    "micro-project-fullstack-9.vercel.app",
+]
+
+
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -36,6 +43,10 @@ MIDDLEWARE = [
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 CORS_ALLOW_ALL_ORIGINS = True
+CSRF_TRUSTED_ORIGINS = [
+    "https://micro-project-fullstack-9.onrender.com",
+    "https://micro-project-fullstack-9.vercel.app",
+]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
