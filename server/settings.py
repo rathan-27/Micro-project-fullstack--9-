@@ -89,3 +89,10 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = []
 
+# server/settings.py
+
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    "micro-project-fullstack-9.onrender.com",   # <--- add this
+]
