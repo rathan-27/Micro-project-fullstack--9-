@@ -1,47 +1,95 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import http from "../api/http";
-import CenterLayout from "../layouts/CenterLayout";
-
 
 export default function Register() {
     const nav = useNavigate();
     const [form, setForm] = useState({ username: "", email: "", password: "" });
-    const [errorMsg, setErrorMsg] = useState("");
+    const [msg, setMsg] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setErrorMsg("");
+        setMsg("");
+
+        if (!form.username || !form.email || !form.password) {
+            setMsg("All fields are required.");
+            return;
+        }
 
         try {
-            await http.post("/register/", form);
-            alert("Registered Successfully! Please Login.");
-            nav("/login");
+            await http.post("/auth/register/", form);
+            setMsg("Account created successfully!");
+
+            setTimeout(() => nav("/login"), 800);
         } catch {
-            setErrorMsg("Registration failed. Try a different username.");
+            setMsg("Registration failed. Try again.");
         }
     };
 
     return (
-        <div className="page-center">
-            <div className="form-box">
-                <h3 className="text-white text-center mb-3">Register</h3>
+        <div className="min-h-screen flex justify-center items-center 
+                        bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] px-4">
 
-                {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
+            <div className="w-full max-w-md text-center">
 
-                <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
+                <h2 className="mb-8 text-3xl font-bold text-white">
+                    Create Account
+                </h2>
 
-                    <input className="form-control" placeholder="Username"
-                        value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />
+                {msg && (
+                    <div className="p-2 mb-4 text-center text-white rounded bg-black/20">
+                        {msg}
+                    </div>
+                )}
 
-                    <input className="form-control" placeholder="Email"
-                        value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                <form onSubmit={handleSubmit} className="space-y-4">
 
-                    <input type="password" className="form-control" placeholder="Password"
-                        value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+                    {/* USERNAME */}
+                    <input
+                        type="text"
+                        placeholder="Username"
+                        value={form.username}
+                        onChange={(e) => setForm({ ...form, username: e.target.value })}
+                        className="w-full px-4 py-3 text-black bg-white rounded-lg shadow-md outline-none focus:ring-2 focus:ring-blue-500"
+                    />
 
-                    <button className="btn btn-primary w-100">Register</button>
+                    {/* EMAIL */}
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        value={form.email}
+                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                        className="w-full px-4 py-3 text-black bg-white rounded-lg shadow-md outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+
+                    {/* PASSWORD */}
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={form.password}
+                        onChange={(e) => setForm({ ...form, password: e.target.value })}
+                        className="w-full px-4 py-3 text-black bg-white rounded-lg shadow-md outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+
+                    {/* BUTTON */}
+                    <button
+                        type="submit"
+                        className="w-full py-3 font-semibold text-white transition-all bg-blue-600 rounded-lg shadow-lg hover:bg-blue-700"
+                    >
+                        Register
+                    </button>
+
                 </form>
+
+                <p className="mt-4 text-gray-300">
+                    Already have an account?{" "}
+                    <span
+                        className="text-blue-400 cursor-pointer"
+                        onClick={() => nav("/login")}
+                    >
+                        Login
+                    </span>
+                </p>
             </div>
         </div>
     );

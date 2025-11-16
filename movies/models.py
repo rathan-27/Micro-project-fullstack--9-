@@ -13,31 +13,24 @@ class Movie(models.Model):
     genres = models.ManyToManyField(Genre, related_name="movies", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def avg_rating(self):
-        agg = self.reviews.filter(is_approved=True).aggregate(models.Avg("rating"))
-        return agg["rating__avg"] or 0
-
     def __str__(self): return self.title
 
 class Review(models.Model):
     movie = models.ForeignKey(Movie, related_name="reviews", on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name="reviews", on_delete=models.CASCADE)
-    rating = models.IntegerField(choices=[(i,i) for i in range(1,6)])
+    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
     text = models.TextField()
-    is_approved = models.BooleanField(default=True)  # moderation optional
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ("movie","user")  # one review per user/movie
+        unique_together = ("movie", "user")
 
 class ReviewReaction(models.Model):
     review = models.ForeignKey(Review, related_name="reactions", on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name="review_reactions", on_delete=models.CASCADE)
-    value = models.SmallIntegerField(choices=[(-1,"dislike"), (1,"like")])
+    value = models.SmallIntegerField(choices=[(-1, "dislike"), (1, "like")])
 
     class Meta:
-        unique_together = ("review","user")
-
-
-# Create your models here.
+        unique_together = ("review", "user")
+        
+poster_url = models.URLField(blank=True, null=True)

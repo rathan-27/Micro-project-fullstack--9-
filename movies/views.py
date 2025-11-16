@@ -1,112 +1,104 @@
-from django.db.models import Avg, Q
 from django.contrib.auth.models import User
-from rest_framework import viewsets, permissions
-from rest_framework.generics import CreateAPIView
+from django.db.models import Avg, Q
+from rest_framework import viewsets
+from rest_framework.generics import RetrieveAPIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from .models import Movie, Review, ReviewReaction
 from .serializers import (
-    RegisterSerializer, UserSerializer,
-    MovieSerializer, ReviewSerializer
+    MovieSerializer,
+    ReviewSerializer,
+    UserSerializer
 )
-from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
+
+# -----------------------
+# PROFILE VIEW
+# -----------------------
+class ProfileView(RetrieveAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
 
 
-class RegisterView(CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = RegisterSerializer
-    permission_classes = [permissions.AllowAny]
-
-
+# -----------------------
+# MOVIES VIEWSET
+# -----------------------
 class MovieViewSet(viewsets.ModelViewSet):
-    queryset = Movie.objects.all()
     serializer_class = MovieSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [AllowAny]
+    queryset = Movie.objects.all()
 
     def get_queryset(self):
-        qs = Movie.objects.all().annotate(avg_rating=Avg("reviews__rating"))
+        qs = Movie.objects.all()
+
         q = self.request.query_params.get("q")
         genre = self.request.query_params.get("genre")
 
         if q:
-            qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
+            qs = qs.filter(
+                Q(title__icontains=q) |
+                Q(description__icontains=q)
+            )
+
         if genre:
             qs = qs.filter(genres__name__iexact=genre)
 
         return qs
 
 
-class ProfileView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        serializer = UserSerializer(request.user)
-        return Response(serializer.data)
-
-    def put(self, request):
-        user = request.user
-        user.username = request.data.get("username", user.username)
-        user.email = request.data.get("email", user.email)
-
-        if request.data.get("password"):
-            user.set_password(request.data.get("password"))
-
-        user.save()
-        return Response({"status": "updated"})
-
-
-from rest_framework import status
-
-class ProfileUpdateView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def put(self, request):
-        user = request.user
-        data = request.data
-
-        if "username" in data:
-            user.username = data["username"]
-
-        if "email" in data:
-            user.email = data["email"]
-
-        if "password" in data and data["password"].strip():
-            user.set_password(data["password"])
-
-        user.save()
-        return Response({"message": "Profile updated successfully"}, status=status.HTTP_200_OK)
-
-
-
+# -----------------------
+# REVIEWS VIEWSET
+# -----------------------
+# -----------------------
+# REVIEWS VIEWSET
+# -----------------------
+# -----------------------
+# REVIEWS VIEWSET
+# -----------------------
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticated & IsOwnerOrReadOnly]
+    queryset = Review.objects.all()
 
-    def get_queryset(self):
-        return Review.objects.select_related("user", "movie")
+    # Permissions
+    def get_permissions(self):
+        if self.action in ["create", "update", "partial_update", "destroy", "react"]:
+            return [IsAuthenticated()]
+        return [AllowAny()]
 
+    # Save review owner
     def perform_create(self, serializer):
-        movie_id = self.request.data.get("movie")
-        serializer.save(user=self.request.user, movie_id=movie_id)
+        serializer.save(user=self.request.user)
 
+    # ⭐ NEW REACT FUNCTION (toggle like/dislike)
     @action(detail=True, methods=["post"])
-    def like(self, request, pk=None):
+    def react(self, request, pk=None):
+        review = self.get_object()
+        try:
+            value = int(request.data.get("value"))
+        except:
+            return Response({"error": "Invalid value"}, status=400)
+
+        if value not in [1, -1]:
+            return Response({"error": "Invalid reaction"}, status=400)
+
+        user = request.user
+        existing = ReviewReaction.objects.filter(review=review, user=user).first()
+
+        # Case 1: same reaction → remove it
+        if existing and existing.value == value:
+            existing.delete()
+            return Response({"status": "removed"})
+
+        # Case 2: switch or new
         ReviewReaction.objects.update_or_create(
-            review=self.get_object(), user=request.user, defaults={"value": 1}
+            review=review,
+            user=user,
+            defaults={"value": value}
         )
-        return Response({"status": "liked"})
 
-    @action(detail=True, methods=["post"])
-    def dislike(self, request, pk=None):
-        ReviewReaction.objects.update_or_create(
-            review=self.get_object(), user=request.user, defaults={"value": -1}
-        )
-        return Response({"status": "disliked"})
+        return Response({"status": "updated"})
 
-    @action(detail=True, methods=["post"])
-    def clear_reaction(self, request, pk=None):
-        ReviewReaction.objects.filter(review=self.get_object(), user=request.user).delete()
-        return Response({"status": "cleared"})

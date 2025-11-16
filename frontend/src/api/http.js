@@ -1,14 +1,98 @@
 import axios from "axios";
 
 const http = axios.create({
-    baseURL: "http://127.0.0.1:8000/api", // ✅ backend base
+    baseURL: "http://127.0.0.1:8000/api/",
 });
 
-// ✅ Automatically send token when logged in
+/* -------------------------
+   1. Attach Access Token
+------------------------- */
 http.interceptors.request.use((config) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("access");
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
 });
+
+/* -------------------------
+   2. Auto Refresh Token
+------------------------- */
+let refreshing = false;
+let queue = [];
+
+const processQueue = (error, token = null) => {
+    queue.forEach((p) => {
+        if (error) p.reject(error);
+        else p.resolve(token);
+    });
+    queue = [];
+};
+
+http.interceptors.response.use(
+    (res) => res,
+    async (err) => {
+        const originalRequest = err.config;
+
+        // If no refresh token → logout
+        if (err.response?.status === 401 && !originalRequest._retry) {
+            const refresh = localStorage.getItem("refresh");
+            if (!refresh) {
+                logoutUser();
+                return Promise.reject(err);
+            }
+
+            // Avoid multiple refresh calls at once
+            if (refreshing) {
+                return new Promise((resolve, reject) => {
+                    queue.push({ resolve, reject });
+                })
+                    .then((token) => {
+                        originalRequest.headers.Authorization = `Bearer ${token}`;
+                        return http(originalRequest);
+                    })
+                    .catch((e) => Promise.reject(e));
+            }
+
+            originalRequest._retry = true;
+            refreshing = true;
+
+            try {
+                const { data } = await axios.post(
+                    "http://127.0.0.1:8000/api/auth/refresh/",
+                    { refresh }
+                );
+
+                const newAccess = data.access;
+
+                // Save new access token
+                localStorage.setItem("access", newAccess);
+
+                // Execute queued requests
+                processQueue(null, newAccess);
+
+                // Retry original request
+                originalRequest.headers.Authorization = `Bearer ${newAccess}`;
+                return http(originalRequest);
+            } catch (e) {
+                processQueue(e, null);
+                logoutUser();
+                return Promise.reject(e);
+            } finally {
+                refreshing = false;
+            }
+        }
+
+        return Promise.reject(err);
+    }
+);
+
+/* -------------------------
+   3. Logout Helper
+------------------------- */
+function logoutUser() {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    localStorage.removeItem("username");
+    window.location.href = "/login";
+}
 
 export default http;

@@ -1,41 +1,82 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 export default function Navbar() {
     const navigate = useNavigate();
-    const token = localStorage.getItem("token");
+    const { pathname } = useLocation();
+
+    const token = localStorage.getItem("access");
+    const username = localStorage.getItem("username");
+
+    // Pages where we should hide Login/Register
+    const hideAuthButtons = ["/", "/welcome", "/get-started"].includes(pathname);
 
     function handleLogout() {
-        localStorage.removeItem("token");
+        localStorage.removeItem("access");
+        localStorage.removeItem("refresh");
+        localStorage.removeItem("username");
         navigate("/login");
     }
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-            <Link className="navbar-brand" to="/">
-                🎬 MovieReviews
-            </Link>
+        <header className="w-full border-b bg-black/70 backdrop-blur-sm border-white/5">
+            <div className="flex items-center justify-between px-4 py-3 mx-auto max-w-7xl">
 
-            <div className="collapse navbar-collapse justify-content-end">
-                {!token ? (
-                    <>
-                        <Link className="btn btn-outline-light me-2" to="/login">
-                            Login
-                        </Link>
-                        <Link className="btn btn-primary" to="/register">
-                            Register
-                        </Link>
-                    </>
-                ) : (
-                    <>
-                        <Link className="btn btn-outline-light me-2" to="/profile">
-                            Profile
-                        </Link>
-                        <button className="btn btn-danger" onClick={handleLogout}>
-                            Logout
-                        </button>
-                    </>
-                )}
+                {/* Logo */}
+                <Link to="/" className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-8 h-8 font-bold text-white rounded bg-gradient-to-br from-primary to-accent">
+                        🎬
+                    </div>
+                    <span className="text-lg font-semibold text-white">
+                        MovieReviews
+                    </span>
+                </Link>
+
+                {/* Right Side Buttons */}
+                <div className="flex items-center gap-3">
+
+                    {/* If NO token AND not intro page */}
+                    {!token && !hideAuthButtons ? (
+                        <>
+                            <Link
+                                to="/login"
+                                className="px-3 py-1 text-white border rounded hover:bg-white/5"
+                            >
+                                Login
+                            </Link>
+
+                            <Link
+                                to="/register"
+                                className="px-3 py-1 text-white rounded bg-primary/95"
+                            >
+                                Register
+                            </Link>
+                        </>
+                    ) : null}
+
+                    {/* If logged in */}
+                    {token ? (
+                        <>
+                            <span className="mr-2 text-white/90">
+                                Hi, {username}
+                            </span>
+
+                            <Link
+                                to="/profile"
+                            >
+                                Profile
+                            </Link>
+
+                            <button
+                                onClick={handleLogout}
+                                className="px-3 py-1 text-red-400"
+                            >
+                                Logout
+                            </button>
+                        </>
+                    ) : null}
+
+                </div>
             </div>
-        </nav>
+        </header>
     );
 }

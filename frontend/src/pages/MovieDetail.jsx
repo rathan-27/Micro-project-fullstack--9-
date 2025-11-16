@@ -9,141 +9,78 @@ export default function MovieDetail() {
     const [movie, setMovie] = useState(null);
     const [text, setText] = useState("");
     const [rating, setRating] = useState(5);
+    const authed = !!localStorage.getItem("access");
 
-    const authed = !!localStorage.getItem("token");
-
-    const load = useCallback(async () => {
+    const loadMovie = useCallback(async () => {
         try {
             const { data } = await http.get(`/movies/${id}/`);
             setMovie(data);
         } catch (err) {
-            console.log("Load movie error:", err);
+            console.log(err);
         }
     }, [id]);
 
-    useEffect(() => {
-        load();
-    }, [load]);
+    useEffect(() => { loadMovie(); }, [loadMovie]);
 
     const submitReview = async () => {
         if (!authed) return alert("Please login to post a review.");
-        if (!text.trim()) return;
-
+        if (!text.trim()) return alert("Review cannot be empty.");
         try {
-            await http.post(`/reviews/`, {
-                movie: id,
-                text,
-                rating: Number(rating),
-            });
-
-            setText("");
-            setRating(5);
-            load(); // refresh after posting
+            await http.post(`/reviews/`, { movie: Number(id), text, rating: Number(rating) });
+            setText(""); setRating(5); loadMovie();
         } catch (err) {
-            console.log("Review post error:", err);
-            alert("Failed to post review. Make sure you are logged in.");
+            console.log(err); alert("Failed to post review.");
         }
     };
 
     const reactTo = async (rid, type) => {
-        if (!authed) return alert("Please login to react to a review.");
-
+        if (!authed) return alert("Please login to react.");
         try {
-            await http.post(`/reviews/${rid}/${type}/`);
-            load(); // refresh after like/dislike
-        } catch (err) {
-            console.log(err);
-        }
+            await http.post(`/reviews/${rid}/react/`, { value: type === "like" ? 1 : -1 });
+            loadMovie();
+        } catch (err) { console.log(err); }
     };
 
-    if (!movie) return <div className="text-center py-5">Loading…</div>;
+    if (!movie) return <div className="text-center text-white py-20">Loading…</div>;
 
     return (
-        <div className="row g-4 text-white">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+            <button onClick={() => nav(-1)} className="px-3 py-2 text-white border rounded">← Go Back</button>
 
-            {/* ✅ GO BACK BUTTON ADDED */}
-            <button
-                onClick={() => nav(-1)}
-                className="btn btn-outline-secondary mb-3"
-            >
-                ← Go Back
-            </button>
-
-            <div className="col-md-4">
-                {movie.poster_url ? (
-                    <img
-                        src={movie.poster_url}
-                        className="img-fluid rounded shadow-sm"
-                        alt={movie.title}
-                    />
-                ) : (
-                    <div className="rounded bg-secondary-subtle" style={{ height: 380 }} />
-                )}
-            </div>
-
-            <div className="col-md-8">
-                <h2 className="mb-1">{movie.title}</h2>
-                <div className="text-muted mb-2">{movie.release_year}</div>
-                <p>{movie.description}</p>
-
-                <div className="mb-2">
-                    <span className="badge text-bg-warning">
-                        ⭐ {Number(movie.avg_rating || 0).toFixed(1)}
-                    </span>
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <img src={movie.poster_url || "/placeholder.png"} alt={movie.title} className="w-full rounded shadow-lg" />
                 </div>
 
-                <div className="mb-3">
-                    {movie.genres?.map((g) => (
-                        <span key={g.id} className="badge text-bg-light me-2">
-                            {g.name}
-                        </span>
-                    ))}
-                </div>
+                <div className="md:col-span-2">
+                    <h1 className="text-3xl font-bold text-white">{movie.title}</h1>
+                    <p className="text-gray-300 mt-1">{movie.release_year}</p>
+                    <p className="text-gray-200 mt-4">{movie.description}</p>
 
-                <hr />
-
-                <h5 className="mb-2">Add a review</h5>
-
-                <div className="row g-2">
-                    <div className="col-auto">
-                        <select
-                            value={rating}
-                            onChange={(e) => setRating(e.target.value)}
-                            className="form-select"
-                        >
-                            {[1, 2, 3, 4, 5].map((n) => (
-                                <option key={n} value={n}>
-                                    {n} ⭐
-                                </option>
-                            ))}
-                        </select>
+                    <div className="mt-4 flex items-center gap-3">
+                        <div className="px-3 py-1 bg-yellow-400 text-black rounded">⭐ {Number(movie.avg_rating || 0).toFixed(1)}</div>
+                        {movie.genres?.map(g => <div key={g.id} className="px-2 py-0.5 bg-cyan-600 rounded text-xs text-white">{g.name}</div>)}
                     </div>
 
-                    <div className="col">
-                        <input
-                            className="form-control"
-                            placeholder="Share your thoughts…"
-                            value={text}
-                            onChange={(e) => setText(e.target.value)}
-                        />
+                    <div className="mt-6">
+                        <h4 className="text-lg text-white mb-2">Add a Review</h4>
+                        <div className="flex gap-2">
+                            <select value={rating} onChange={e => setRating(e.target.value)} className="px-3 py-2 rounded bg-white/10 text-white">
+                                {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n} ⭐</option>)}
+                            </select>
+                            <input value={text} onChange={e => setText(e.target.value)} placeholder="Write a review..."
+                                className="flex-1 px-3 py-2 rounded bg-white/5 text-white" />
+                            <button onClick={submitReview} className="px-4 py-2 bg-primary text-white rounded">Post</button>
+                        </div>
                     </div>
 
-                    <div className="col-auto">
-                        <button onClick={submitReview} className="btn btn-primary">
-                            Post
-                        </button>
-                    </div>
-                </div>
-
-                <div className="mt-4">
-                    <h5 className="mb-2">Reviews</h5>
-                    <div className="d-flex flex-column gap-3">
-                        {(movie.reviews || []).map((r) => (
-                            <ReviewItem key={r.id} r={r} onReact={reactTo} />
-                        ))}
-                        {!movie.reviews?.length && (
-                            <div className="text-muted">No reviews yet.</div>
-                        )}
+                    <div className="mt-8">
+                        <h4 className="text-xl text-white mb-4">Reviews</h4>
+                        <div className="flex flex-col gap-4">
+                            {movie.reviews?.length ? movie.reviews.map(r => (
+                                <ReviewItem key={r.id} r={r} onReact={reactTo} />
+                            )) : <div className="text-gray-400">No reviews yet.</div>}
+                        </div>
                     </div>
                 </div>
             </div>

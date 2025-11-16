@@ -1,19 +1,18 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import RegisterView, MovieViewSet, ReviewViewSet, ProfileView,ProfileUpdateView
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from .views import MovieViewSet, ReviewViewSet
+from .auth_views import RegisterView, LoginView, ProfileView
 
 router = DefaultRouter()
-router.register("movies", MovieViewSet, basename="movies")
-router.register("reviews", ReviewViewSet, basename="reviews")
+router.register("movies", MovieViewSet)
+router.register("reviews", ReviewViewSet)
 
 urlpatterns = [
-    path("auth/register/", RegisterView.as_view()),
-    path("auth/login/", TokenObtainPairView.as_view()),
-    path("auth/refresh/", TokenRefreshView.as_view()),
-    path("auth/profile/", ProfileView.as_view()),
     path("", include(router.urls)),
-    path("auth/profile/update/", ProfileUpdateView.as_view()),
 
+    # AUTH API
+    path("auth/register/", RegisterView.as_view()),
+    path("auth/login/", LoginView.as_view()),
+    path("auth/profile/", ProfileView.as_view()),
 ]
