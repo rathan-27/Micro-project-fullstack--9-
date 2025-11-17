@@ -6,14 +6,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-_onqlv5-@7(q8w(lgx&o($b00p65m&!r3vu2=@xwjnle^fshaf'
 DEBUG = True
+
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
     "micro-project-fullstack-9.onrender.com",
     "micro-project-fullstack-9.vercel.app",
 ]
-
-
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -43,6 +42,7 @@ MIDDLEWARE = [
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
 CSRF_TRUSTED_ORIGINS = [
     "https://micro-project-fullstack-9.onrender.com",
     "https://micro-project-fullstack-9.vercel.app",
@@ -62,7 +62,7 @@ ROOT_URLCONF = "server.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],  # optional but correct
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -89,21 +89,12 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = []
-
-# server/settings.py
-
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "localhost",
-    "micro-project-fullstack-9.onrender.com",   # <--- add this
-]
