@@ -57,9 +57,14 @@ export default function Profile() {
 
                 {/* Avatar */}
                 <div className="flex flex-col items-center">
-                    <div className="flex items-center justify-center w-20 h-20 text-3xl font-bold text-white bg-blue-600 rounded-full">
-                        {profile.username[0].toUpperCase()}
+                    <div className="avatar">
+                        {profile.profile_pic ? (
+                            <img src={profile.profile_pic} className="object-cover w-24 h-24 rounded-full" />
+                        ) : (
+                            profile.username[0].toUpperCase()
+                        )}
                     </div>
+
 
                     <h2 className="mt-4 text-2xl font-semibold text-white">
                         {profile.username}

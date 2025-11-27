@@ -1,7 +1,9 @@
 import axios from "axios";
 
 const http = axios.create({
-    baseURL: "https://micro-project-fullstack-9.onrender.com/api",
+    baseURL: "/api",
+
+
 });
 
 /* -------------------------
@@ -57,7 +59,7 @@ http.interceptors.response.use(
             try {
                 // ✅ FIXED REFRESH URL (NO MORE LOCALHOST)
                 const { data } = await axios.post(
-                    "https://micro-project-fullstack-9.onrender.com/api/auth/refresh/",
+                    "http://127.0.0.1:8000/api/auth/refresh/",
                     { refresh }
                 );
 

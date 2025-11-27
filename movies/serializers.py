@@ -1,21 +1,21 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.db.models import Avg
-from .models import Movie, Genre, Review, ReviewReaction
+from .models import Movie, Genre, Review, ReviewReaction, UserProfile
 
 
-# --------------------
+# -----------------------------
 # BASIC USER SERIALIZER
-# --------------------
+# -----------------------------
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "username", "email"]
 
 
-# --------------------
+# -----------------------------
 # REGISTER SERIALIZER
-# --------------------
+# -----------------------------
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
@@ -41,18 +41,18 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
 
 
-# --------------------
+# -----------------------------
 # GENRE SERIALIZER
-# --------------------
+# -----------------------------
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         fields = ["id", "name"]
 
 
-# --------------------
+# -----------------------------
 # REVIEW SERIALIZER
-# --------------------
+# -----------------------------
 class ReviewSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     reactions = serializers.SerializerMethodField()
@@ -66,17 +66,16 @@ class ReviewSerializer(serializers.ModelSerializer):
             "rating",
             "text",
             "created_at",
-            "reactions"
+            "reactions",
         ]
 
     def get_reactions(self, obj):
         return [{"user": r.user.id, "value": r.value} for r in obj.reactions.all()]
 
 
-
-# --------------------
+# -----------------------------
 # MOVIE SERIALIZER
-# --------------------
+# -----------------------------
 class MovieSerializer(serializers.ModelSerializer):
     genres = GenreSerializer(many=True)
     reviews = ReviewSerializer(many=True, read_only=True)
@@ -99,9 +98,9 @@ class MovieSerializer(serializers.ModelSerializer):
         return obj.reviews.aggregate(Avg("rating"))["rating__avg"]
 
 
-# --------------------
-# REVIEWED MOVIE SERIALIZER (used in profile)
-# --------------------
+# -----------------------------
+# REVIEWED MOVIE SERIALIZER
+# -----------------------------
 class ReviewedMovieSerializer(serializers.ModelSerializer):
     user_rating = serializers.SerializerMethodField()
     review_id = serializers.SerializerMethodField()
@@ -121,14 +120,15 @@ class ReviewedMovieSerializer(serializers.ModelSerializer):
         return review.id if review else None
 
 
-# --------------------
+# -----------------------------
 # FULL USER PROFILE SERIALIZER
-# --------------------
+# -----------------------------
 class UserProfileSerializer(serializers.ModelSerializer):
     joined = serializers.DateTimeField(source="date_joined", format="%Y-%m-%d", read_only=True)
     reviews_count = serializers.SerializerMethodField()
     avg_rating_given = serializers.SerializerMethodField()
     reviewed_movies = serializers.SerializerMethodField()
+    profile_pic = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -140,7 +140,25 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "reviews_count",
             "avg_rating_given",
             "reviewed_movies",
+            "profile_pic",
         ]
+
+    # ✅ FIXED PROFILE PIC METHOD
+    def get_profile_pic(self, user):
+        try:
+            if hasattr(user, "profile") and user.profile.profile_pic:
+                request = self.context.get("request")
+                url = user.profile.profile_pic.url
+
+                # Return absolute URL if request exists
+                if request:
+                    return request.build_absolute_uri(url)
+
+                return url
+        except:
+            return None
+
+        return None
 
     def get_reviews_count(self, user):
         return user.reviews.count()
@@ -151,8 +169,4 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     def get_reviewed_movies(self, user):
         movies = Movie.objects.filter(reviews__user=user).distinct()
-        return ReviewedMovieSerializer(
-            movies,
-            many=True,
-            context={"user": user}
-        ).data
+        return ReviewedMovieSerializer(movies, many=True, context={"user": user}).data

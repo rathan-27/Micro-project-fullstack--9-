@@ -11,8 +11,12 @@ export default function EditProfile() {
         password: "",
     });
 
+    const [profile, setProfile] = useState({});
     const [msg, setMsg] = useState("");
 
+    /* -------------------------
+       Load Profile Data
+    -------------------------- */
     useEffect(() => {
         http.get("/auth/profile/")
             .then(({ data }) => {
@@ -21,10 +25,14 @@ export default function EditProfile() {
                     email: data.email,
                     password: "",
                 });
+                setProfile(data);  // ⭐ important
             })
             .catch(() => setMsg("Failed to load profile."));
     }, []);
 
+    /* -------------------------
+       Save Profile
+    -------------------------- */
     const handleSave = async () => {
         setMsg("");
 
@@ -37,15 +45,35 @@ export default function EditProfile() {
 
             setMsg("Profile updated successfully!");
 
-            // Reset password field
             setForm({ ...form, password: "" });
 
-            // Redirect after success
             setTimeout(() => {
                 nav("/profile");
             }, 800);
+
         } catch {
             setMsg("Update failed. Try again.");
+        }
+    };
+
+    /* -------------------------
+       Upload Profile Picture
+    -------------------------- */
+    const uploadPic = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("profile_pic", file);
+
+        try {
+            await http.post("/auth/upload_pic/", formData, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
+
+            window.location.reload();
+        } catch {
+            alert("Failed to upload picture.");
         }
     };
 
@@ -61,23 +89,40 @@ export default function EditProfile() {
                 ← Go Back
             </button>
 
-            {/* Page Title */}
-            <h2 className="mb-2 text-4xl font-semibold text-white">
-                Edit Profile
-            </h2>
+            {/* Title */}
+            <h2 className="mb-2 text-4xl font-semibold text-white">Edit Profile</h2>
+            <p className="mb-8 text-gray-300">Update your account details below</p>
 
-            <p className="mb-8 text-gray-300">
-                Update your account details below
-            </p>
-
-            {/* Success/Error message */}
+            {/* Status Message */}
             {msg && (
                 <div className="px-4 py-2 mb-4 text-white rounded bg-black/30">
                     {msg}
                 </div>
             )}
 
-            {/* Centered Form */}
+            {/* Profile Picture Upload */}
+            <div className="flex flex-col items-center gap-4 mb-8">
+
+                <img
+                    src={profile?.profile_pic || "/default-avatar.png"}
+                    className="object-cover border-2 rounded-full w-28 h-28 border-white/20"
+                    alt="Profile"
+                />
+
+                {/* Better Upload Button */}
+                <label className="px-4 py-2 text-white transition rounded-lg cursor-pointer bg-white/10 hover:bg-white/20">
+                    Choose Profile Picture
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={uploadPic}
+                        className="hidden"
+                    />
+                </label>
+
+            </div>
+
+            {/* Form */}
             <div className="w-full max-w-xl space-y-4">
 
                 {/* Username */}
