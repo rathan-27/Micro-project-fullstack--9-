@@ -4,6 +4,13 @@ A full-stack Movie Review Platform built using Django REST Framework (Backend) a
 Users can browse movies, post reviews, rate movies, and manage their own accounts.
 Admins can manage movies, users, and moderate reviews via Django Admin Panel.
 
+team members -
+Rathan kv(4mc23is087),
+Tejaswi kg(4mc23is116),
+Sandesh DR(4mc23is094),
+Vinay nl(4mc23is125),
+shreyas cs(4mc23is101)
+
 🚀 Features
 🎯 User Features
 
